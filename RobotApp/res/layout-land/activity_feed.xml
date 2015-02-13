@@ -1,0 +1,38 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.robotapp.Feed" >
+    
+        <com.camera.simplemjpeg.MjpegView
+		android:id="@+id/videoFeed"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        />
+    
+    <com.example.robotapp.JoystickView
+        android:id="@+id/rightJoystick"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="right|bottom"
+        />
+    
+    <com.example.robotapp.JoystickView
+        android:id="@+id/leftJoystick"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_gravity="left|bottom"  
+       	 />
+
+    
+    <Button
+        android:id="@+id/messageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="44dp"
+        android:onClick="openMessagePrompt"
+        android:text="@string/message_btn"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginRight="30dp" />
+
+</FrameLayout>
