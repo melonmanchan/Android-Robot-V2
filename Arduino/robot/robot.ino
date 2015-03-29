@@ -1,47 +1,61 @@
-
+#include <Adafruit_TiCoServo.h>
+#include <known_16bit_timers.h>
 #include <Arduino.h>
 #include <Wire.h>
-#include "Adafruit_LEDBackpack.h"
 #include "Adafruit_GFX.h"
 #include "SPI.h" // Comment out this line if using Trinket or Gemma
-#include <SoftwareSerial.h>
 #include <Adafruit_MotorShield.h>
-#include <Servo2.h>
+#include <Adafruit_BLE_UART.h>
+#include <Adafruit_NeoMatrix.h>
+#include <Adafruit_NeoPixel.h>
 
-#define  c     3830    // 261 Hz
-#define  d     3400    // 294 Hz
-#define  e     3038    // 329 Hz
-#define  f     2864    // 349 Hz
-#define  g     2550    // 392 Hz
-#define  a     2272    // 440 Hz
-#define  b     2028    // 493 Hz
-#define  C     1912    // 523 Hz 
+#define ADAFRUITBLE_REQ 8
+#define ADAFRUITBLE_RDY 2     // This should be an interrupt pin, on Uno thats #2 or #3
+#define ADAFRUITBLE_RST 3
 
-int melody[] = {c, d, e, f, g, a, b, C};
-
+#define EYE_PIN 5
+#define MOUTH_PIN 6
 Adafruit_MotorShield motorShield = Adafruit_MotorShield();
-Adafruit_DCMotor *leftMotor = motorShield.getMotor(3);
-Adafruit_DCMotor *rightMotor = motorShield.getMotor(4);
+Adafruit_DCMotor *leftMotor = motorShield.getMotor(1);
+Adafruit_DCMotor *rightMotor = motorShield.getMotor(2);
 
-Adafruit_8x8matrix eyematrix = Adafruit_8x8matrix();
+Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
-// Bit banged serial for the mouth
-SoftwareSerial mouthSerial(2, 3); // RX, TX
+int eye_pupil_color = 12314;
+int eye_ball_color = 23142;
 
+Adafruit_NeoMatrix eyematrix = Adafruit_NeoMatrix(8, 8, EYE_PIN,
+                               NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
+                               NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
+                               NEO_GRB            + NEO_KHZ800);
+
+
+Adafruit_NeoMatrix mouthmatrix = Adafruit_NeoMatrix(8, 5, MOUTH_PIN,
+                                 NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
+                                 NEO_MATRIX_ROWS + NEO_MATRIX_PROGRESSIVE,
+                                 NEO_GRB            + NEO_KHZ800);
 // char-array to hold the incoming message
 char robotMessage[40];
 byte robotMessageIndex = 0;
 
 // Two robot servos
-Servo bottomServo;
-Servo topServo; 
- 
+Adafruit_TiCoServo bottomServo;
+Adafruit_TiCoServo topServo;
+
 // Starting positions for servos.
 byte bottomPos = 90;
-byte topPos = 150;
+byte topPos = 25;
 
 
-static const uint8_t matrixAddr = 0x71;
+byte bottomPosMax = 175;
+byte bottomPosMin = 15;
+
+byte topPosMax = 100;
+byte topPosMin = 25;
+
+// How much to move servo position on each motor command
+byte topServoIncrement = 5;
+byte bottomServoIncrement = 5;
 
 // Timers used to "simulate" threading
 unsigned long eyeTimer;
@@ -55,18 +69,9 @@ unsigned long messageEstimatedTime = 400;
 unsigned long timeSinceLastCmd = 0;
 unsigned long currentCmdTime;
 
-String mouth  = "$$$F000111000111111111111111111000111000111111111111111111000111000000111000111111111111111111000111000111111111111111111000111000";
-uint8_t mouthIndex = 0;
-/*
-char* mouthAnimations[5] = {"$$$F000010000111111111111111111000010000111111111111111111000010000000010000111111111111111111000010000111111111111111111000010000",
-                            "$$$F000111000111111111111111111000111000111111111111111111000111000000111000111111111111111111000111000111111111111111111000111000",
-                            "$$$F001111100111111111111111111001111100111111111111111111001111100001111100111111111111111111001111100111111111111111111001111100",
-                            "$$$F000111000111111111111111111000111000111111111111111111000111000000111000111111111111111111000111000111111111111111111000111000",
-                          "$$$F000010000111111111111111111000010000111111111111111111000010000000010000111111111111111111000010000111111111111111111000010000"};*/
-                          
 
 static const uint8_t PROGMEM // Bitmaps are stored in program memory
-  blinkImg[][8] = {    // Eye animation frames
+blinkImg[][8] = {    // Eye animation frames
   { B00111100,         // Fully open eye
     B01111110,
     B11111111,
@@ -74,7 +79,8 @@ static const uint8_t PROGMEM // Bitmaps are stored in program memory
     B11111111,
     B11111111,
     B01111110,
-    B00111100 },
+    B00111100
+  },
   { B00000000,
     B01111110,
     B11111111,
@@ -82,7 +88,8 @@ static const uint8_t PROGMEM // Bitmaps are stored in program memory
     B11111111,
     B11111111,
     B01111110,
-    B00111100 },
+    B00111100
+  },
   { B00000000,
     B00000000,
     B00111100,
@@ -90,7 +97,8 @@ static const uint8_t PROGMEM // Bitmaps are stored in program memory
     B11111111,
     B11111111,
     B00111100,
-    B00000000 },
+    B00000000
+  },
   { B00000000,
     B00000000,
     B00000000,
@@ -98,7 +106,8 @@ static const uint8_t PROGMEM // Bitmaps are stored in program memory
     B11111111,
     B01111110,
     B00011000,
-    B00000000 },
+    B00000000
+  },
   { B00000000,         // Fully closed eye
     B00000000,
     B00000000,
@@ -106,7 +115,9 @@ static const uint8_t PROGMEM // Bitmaps are stored in program memory
     B10000001,
     B01111110,
     B00000000,
-    B00000000 } };
+    B00000000
+  }
+};
 
 
 uint16_t j = (384 * 5) - 1 ;
@@ -123,6 +134,50 @@ int8_t newY = 3;   // Next eye position
 int8_t  dX   = 0;
 int8_t dY   = 0;   // Distance from prior to new position
 
+
+
+byte mouthIndex = 0;
+boolean isMouthAnimationPlayingBackwards = false;
+// different mouth positions
+static const uint8_t mouthPos[][5] PROGMEM =
+{
+  {
+    0xff,
+    0xff,
+    0xff,
+    0xff,
+    0xff
+  },
+  {
+    0xff,
+    0xff,
+    0xaa,
+    0x55,
+    0xff
+  },
+  {
+    // open maw for mouth pos 1
+    0xff,
+    0xaa,
+    0x0,
+    0x55,
+    0xff
+  },
+  {
+    0xaa,
+    0x0,
+    0x0,
+    0x0,
+    0x55
+  }
+};
+
+unsigned long mouthTimer;
+unsigned long mouthLastTimer;
+unsigned long mouthAcc;
+
+
+
 byte incomingByte;
 
 // Bytes to know what messages are about to be received
@@ -135,7 +190,7 @@ static const byte PIN_PWM_DELIMITER = 120;
 static const byte MOTOR_FORWARD = 70;
 static const byte MOTOR_RELEASE = 82;
 static const byte MOTOR_BACKWARD = 66;
-	
+
 // bytes indicating servo movement.
 static const byte SERVO_UP = 1;
 static const byte SERVO_UP_RIGHT = 2;
@@ -151,64 +206,95 @@ boolean isTransmittingMessage = false;
 
 byte motorCommand[5];
 byte motorCmdIndex = 0;
-long previousMillis = 0; 
+long previousMillis = 0;
 
 typedef enum {NOTHING, MOTOR, MESSAGE, TOGGLE, PINPWM} state;
 state currentState;
 
 void setup() {
   motorShield.begin();
-  eyematrix.begin(matrixAddr);
+  Serial.begin(9600);
+  eyematrix.begin();
+  eyematrix.setBrightness(1);
+
+  mouthmatrix.begin();
+  mouthmatrix.setBrightness(1);
+  resetRobotMouth();
+  BTLEserial.setDeviceName("ROBOT"); /* 7 characters max! */
+
+  BTLEserial.begin();
+  Serial.begin(9600);
   currentState = NOTHING;
-  mouthSerial.begin(9600);
-  mouthSerial.println("$$$SPEED100");
-  Serial.begin(115200);
   // Seed random number generator from an unused analog input:
   randomSeed(analogRead(A0));
   // Initialize each matrix object:
-  eyematrix.setRotation(3);
-  mouthSerial.println(mouth);
-  
-  bottomServo.attach(10);
-  topServo.attach(9);  // attaches the servo on pin 9 to the servo object 
+
+  bottomServo.attach(12, 500, 2200);
+  topServo.attach(13, 500, 2200);  // attaches the servo on pin 9 to the servo object
   bottomServo.write(bottomPos);
   topServo.write(topPos);
+
+  while (Serial.read() != ':');   // When the Emic 2 has initialized and is ready, it will send a single ':' character, so wait here until we receive it
+  delay(10);                          // Short delay
+  Serial.flush();                 // Flush the receive buffer
+  Serial.println("V18");
   
 }
 
 void loop() {
-  handleSerialInput();
 
-  currentCmdTime = eyeTimer = messageCurrentTime = millis();
-  
+  BTLEserial.pollACI();
+  //BTLEserial.pollACI();
+  handleSerialInput();
+  //BTLEserial.pollACI();
+
+  currentCmdTime = mouthTimer = eyeTimer = messageCurrentTime = millis();
+
   eyeAcc += eyeTimer - eyeLastTimer;
   eyeLastTimer = eyeTimer;
-  
+
+  mouthAcc += mouthTimer - mouthLastTimer;
+  mouthLastTimer = mouthTimer;
+
   while (eyeAcc >= 70)
   {
     animateEyes();
     eyeAcc = 0;
-  } 
-  
+  }
+
+
+  while (mouthAcc >= 100)
+  {
+    if (isTransmittingMessage)
+    {
+      animateMouth();
+
+      if (messageCurrentTime - messageStartTime >= messageEstimatedTime)
+      {
+        resetRobotMouth();
+        isTransmittingMessage = false;
+        //mouthSerial.println(mouth);
+      }
+    }
+    mouthAcc = 0;
+  }
+
+  /*
   if (isTransmittingMessage)
   {
-    
-    if (messageCurrentTime % 125 == 0)
-    {
-     tone(5,  melody[random(0, sizeof(melody)-1)]);
-    }
-    
+
+
     if (messageCurrentTime - messageStartTime >= messageEstimatedTime)
     {
          noTone(5);
-         mouthSerial.println(mouth);
+         //mouthSerial.println(mouth);
          isTransmittingMessage = false;
     }
-  }
+  }*/
 }
 
 void animateEyes() {
-   // Draw eyeball in current state of blinkyness (no pupil).  Note that
+  // Draw eyeball in current state of blinkyness (no pupil).  Note that
   // only one eye needs to be drawn.  Because the two eye matrices share
   // the same address, the same data will be received by both.
   eyematrix.clear();
@@ -216,33 +302,33 @@ void animateEyes() {
   // open state.  On the last few counts (during the blink), look up
   // the corresponding bitmap index.
   eyematrix.drawBitmap(0, 0,
-    blinkImg[
-      (blinkCountdown < sizeof(blinkIndex)) ? // Currently blinking?
-      blinkIndex[blinkCountdown] :            // Yes, look up bitmap #
-      0                                       // No, show bitmap 0
-    ], 8, 8, LED_ON);
+                       blinkImg[
+                         (blinkCountdown < sizeof(blinkIndex)) ? // Currently blinking?
+                         blinkIndex[blinkCountdown] :            // Yes, look up bitmap #
+                         0                                       // No, show bitmap 0
+                       ], 8, 8, eye_ball_color);
   // Decrement blink counter.  At end, set random time for next blink.
- if(--blinkCountdown == 0) blinkCountdown = random(5, 180);
+  if (--blinkCountdown == 0) blinkCountdown = random(5, 180);
 
   // Add a pupil (2x2 black square) atop the blinky eyeball bitmap.
   // Periodically, the pupil moves to a new position...
-  
-  if(--gazeCountdown <= gazeFrames)
+
+  if (--gazeCountdown <= gazeFrames)
   {
     // Eyes are in motion - draw pupil at interim position
     eyematrix.fillRect(
       newX - (dX * gazeCountdown / gazeFrames),
       newY - (dY * gazeCountdown / gazeFrames),
-      2, 2, LED_OFF);
-    if(gazeCountdown == 0)
-    {    // Last frame?
+      2, 2, eye_pupil_color);
+    if (gazeCountdown == 0)
+    { // Last frame?
       eyeX = newX; eyeY = newY; // Yes.  What's new is old, then...
       do
       { // Pick random positions until one is within the eye circle
         newX = random(7); newY = random(7);
         dX   = newX - 3;  dY   = newY - 3;
-      } while((dX * dX + dY * dY) >= 10);      // Thank you Pythagoras
-      
+      } while ((dX * dX + dY * dY) >= 10);     // Thank you Pythagoras
+
       dX            = newX - eyeX;             // Horizontal distance to move
       dY            = newY - eyeY;             // Vertical distance to move
       gazeFrames    = random(3, 15);           // Duration of eye movement
@@ -250,267 +336,259 @@ void animateEyes() {
     }
   } else {
     // Not in motion yet -- draw pupil at current static position
-    eyematrix.fillRect(eyeX, eyeY, 2, 2, LED_OFF);
+    eyematrix.fillRect(eyeX, eyeY, 2, 2, eye_pupil_color);
   }
 
-  eyematrix.writeDisplay();
+  eyematrix.show();
+}
+
+
+void animateMouth() {
+  mouthmatrix.clear();
+  mouthmatrix.fillScreen(0xF800);
+  mouthmatrix.drawBitmap(0, 0, mouthPos[mouthIndex], 8, 5, 0xFFFF );
+  mouthmatrix.show();
+
+  if (mouthIndex == 3)
+  {
+    isMouthAnimationPlayingBackwards = true;
+  }
+
+  else if (mouthIndex == 0)
+  {
+    isMouthAnimationPlayingBackwards = false;
+  }
+
+
+  if (isMouthAnimationPlayingBackwards == false)
+  {
+    mouthIndex += 1;
+  }
+
+  else if (isMouthAnimationPlayingBackwards == true)
+  {
+    mouthIndex -= 1;
+  }
+}
+
+void resetRobotMouth() {
+  mouthmatrix.clear();
+  mouthmatrix.fillScreen(0xF800);
+  mouthmatrix.drawBitmap(0, 0, mouthPos[1], 8, 5, 0xFFFF );
+  mouthmatrix.show();
+
 }
 
 
 void flushSerial()
-  {
-   while(Serial.available())
-        Serial.read(); 
-  }
-  
+{
+  while (Serial.available())
+    Serial.read();
+}
+
 void handleSerialInput()
+{
+  if (BTLEserial.available() > 0)
   {
-    if (Serial.available() > 0)
+    timeSinceLastCmd = millis();
+    incomingByte = BTLEserial.read();
+
+    if (incomingByte == MOTOR_COMMAND_DELIMITER && currentState == NOTHING)
     {
-      timeSinceLastCmd = millis();
-      incomingByte = Serial.read();
-      
-      if (incomingByte == MOTOR_COMMAND_DELIMITER && currentState == NOTHING)
+      currentState = MOTOR;
+
+
+      if (BTLEserial.available() > 0)
       {
-       currentState = MOTOR;
-       return;
+        incomingByte = BTLEserial.read();
       }
-      
-      else if (incomingByte == MESSAGE_DELIMITER && currentState == NOTHING)
-      {
-       currentState = MESSAGE;
-       return;
-      }
-      
-      else if (incomingByte == PIN_TOGGLE_DELIMITER && currentState == NOTHING)
-      {
-       currentState = TOGGLE;
-       return;
-      }
-      
-      else if (incomingByte == PIN_PWM_DELIMITER && currentState == NOTHING)
-      {
-       currentState = PINPWM;
-       return; 
-      }
-      
-      if (currentState == MOTOR)
-       {
-         handleRobotMovement(incomingByte);
-       }
-        
-       else if (currentState == MESSAGE)
-       {
-         handleRobotIncomingMessage(incomingByte);
-       }
-       
-       else if (currentState == TOGGLE)
-       {
-         delay(25);
-         
-         byte secondByte = Serial.read();
-         
-         changePinToggleState(incomingByte, secondByte);
-       }
-        
-       else if (currentState == PINPWM)
-       {
-        delay(25);
-        // multiply by two since Java bytes are from -127 to 127 and we want the value from 0 to 255.
-        byte secondByte = Serial.read() * 2;
-         
-         // since the maximum value of 127 * 2 is 254, this way we can handle full voltage pwm
-         if (secondByte == 254)
-           secondByte = 255;
-           
-        changePinPWMState(incomingByte, secondByte);
-       }
-      }
-      
+
       else
       {
-       if (currentCmdTime - timeSinceLastCmd > 10000)
-       {
-         currentState = NOTHING;
-         runMotor(0, MOTOR_RELEASE, leftMotor);
-         runMotor(0, MOTOR_RELEASE, rightMotor);
-       } 
+        return;
       }
-  }
 
-void handleRobotMovement(byte incomingByte)
-  {
+    }
+
+    else if (incomingByte == MESSAGE_DELIMITER && currentState == NOTHING)
+    {
+      currentState = MESSAGE;
+
+      if (BTLEserial.available() > 0)
+      {
+        incomingByte = BTLEserial.read();
+      }
+
+      else
+      {
+        return;
+      }
+
+    }
+    /*
+    else if (incomingByte == PIN_TOGGLE_DELIMITER && currentState == NOTHING)
+    {
+     currentState = TOGGLE;
+     return;
+    }
+
+    else if (incomingByte == PIN_PWM_DELIMITER && currentState == NOTHING)
+    {
+     currentState = PINPWM;
+     return;
+    }
+    */
+    if (currentState == MOTOR)
+    {
+
       if (motorCmdIndex <= 4)
       {
         motorCommand[motorCmdIndex] = incomingByte;
         motorCmdIndex++;
       }
-      
-     else if (motorCmdIndex >= 5 && currentState == MOTOR)
-     {
-       byte leftDirection = motorCommand[0];
-       byte leftSpeed= motorCommand[1] * 2;
-       
-       byte rightDirection = motorCommand[2];
-       byte rightSpeed = motorCommand[3] * 2;
-       runMotor(leftSpeed, leftDirection, leftMotor);
 
-       runMotor(rightSpeed, rightDirection, rightMotor);
-       
-       byte servoMovement = motorCommand[4];
-         
-       if (servoMovement != SERVO_NOTHING)
-       {
-         moveServo(servoMovement);
-        }
-       motorCmdIndex = 0;
-       currentState = NOTHING;
-     }
+      else if (motorCmdIndex >= 5)
+      {
+        handleRobotMovement(incomingByte);
+      }
+    }
+
+    else if (currentState == MESSAGE)
+    {
+      handleRobotIncomingMessage(incomingByte);
+    }
   }
+
+  else
+  {
+    if (currentCmdTime - timeSinceLastCmd > 1000)
+    {
+      currentState = NOTHING;
+      runMotor(0, MOTOR_RELEASE, leftMotor);
+      runMotor(0, MOTOR_RELEASE, rightMotor);
+    }
+  }
+}
+
+
+
+
+void handleRobotMovement(byte incomingByte)
+{
+  byte leftDirection = motorCommand[0];
+  byte leftSpeed = motorCommand[1] * 2;
+
+  byte rightDirection = motorCommand[2];
+  byte rightSpeed = motorCommand[3] * 2;
+  runMotor(leftSpeed, leftDirection, leftMotor);
+
+  runMotor(rightSpeed, rightDirection, rightMotor);
+
+  byte servoMovement = motorCommand[4];
+
+  if (servoMovement != SERVO_NOTHING)
+  {
+    moveServo(servoMovement);
+  }
+  motorCmdIndex = 0;
+  currentState = NOTHING;
+
+}
 
 void handleRobotIncomingMessage(byte incomingByte)
-  { 
-    if ((char)incomingByte != '\n' && robotMessageIndex < 38)
-    {
-      robotMessage[robotMessageIndex] = (char)incomingByte;
-      robotMessageIndex++;
-      
-    }
-    else 
-    {
-      // null-terminated string
-      robotMessage[robotMessageIndex + 1] = '\0';
-      String messageAsString(robotMessage);
-      mouthSerial.println("$$$ALL,OFF");
-      mouthSerial.println(messageAsString);    
-      messageStartTime = millis();
-      messageEstimatedTime = messageAsString.length() * 600;
-      isTransmittingMessage = true;
-      currentState = NOTHING;
-      robotMessageIndex = 0;
-      // most efficient way to reallocate a char array to null.
-      memset(&robotMessage[0], 0, sizeof(robotMessage));
-    }
+{
+  if ((char)incomingByte != '\n' && robotMessageIndex < 38)
+  {
+    robotMessage[robotMessageIndex] = (char)incomingByte;
+    robotMessageIndex++;
+
   }
+  else
+  {
+    // null-terminated string
+    robotMessage[robotMessageIndex + 1] = '\0';
+    String messageAsString(robotMessage);
+    //mouthSerial.println("$$$ALL,OFF");
+    Serial.print('S');
+    Serial.print(messageAsString);
+    Serial.print('\n');
+    messageStartTime = millis();
+    messageEstimatedTime = messageAsString.length() * 150;
+    isTransmittingMessage = true;
+    currentState = NOTHING;
+    robotMessageIndex = 0;
+    // most efficient way to reallocate a char array to null.
+    memset(&robotMessage[0], 0, sizeof(robotMessage));
+  }
+}
 
 void runMotor(byte motorSpeed, byte motorDirection, Adafruit_DCMotor *motor)
-  {
-   motor->setSpeed(motorSpeed); 
-   
-   switch(motorDirection) {
+{
+  motor->setSpeed(50);
+
+  switch (motorDirection) {
     case MOTOR_FORWARD:
-       motor->run(FORWARD);
-       break;
+      motor->run(FORWARD);
+      break;
     case MOTOR_BACKWARD:
-       motor->run(BACKWARD);
-       break;
+      motor->run(BACKWARD);
+      break;
     case MOTOR_RELEASE:
-       motor->run(RELEASE);   
-       break;
-   }
+      motor->run(RELEASE);
+      break;
   }
-  
-  
+}
+
+
 void moveServo(byte servoDirection)
+{
+
+  if (servoDirection == SERVO_DOWN && topPos > topPosMin)
   {
-    
-  if (servoDirection == SERVO_DOWN && topPos < 150)
-  {
-   topPos = topPos + 10; 
-  }
-  
-  else if (servoDirection == SERVO_UP && topPos >= 110)
-  {
-    topPos = topPos - 10; 
+    topPos = topPos - topServoIncrement;
   }
 
-  else if (servoDirection == SERVO_LEFT && bottomPos < 160)
+  else if (servoDirection == SERVO_UP && topPos <= topPosMax)
   {
-   bottomPos = bottomPos + 10; 
+    topPos = topPos + topServoIncrement;
   }
-  
-  else if (servoDirection == SERVO_RIGHT && bottomPos  >= 20)
+
+  else if (servoDirection == SERVO_LEFT && bottomPos <= bottomPosMax)
   {
-    bottomPos = bottomPos - 10; 
-  }  
-  
-  else if (servoDirection == SERVO_DOWN_RIGHT && bottomPos  >= 20 && topPos < 150)
+    bottomPos = bottomPos + bottomServoIncrement;
+  }
+
+  else if (servoDirection == SERVO_RIGHT && bottomPos >= bottomPosMin)
   {
-    topPos = topPos + 10; 
-    bottomPos = bottomPos - 10; 
-  }  
-  
-  else if (servoDirection == SERVO_DOWN_LEFT && bottomPos < 160 && topPos < 150)
+    bottomPos = bottomPos - bottomServoIncrement;
+  }
+
+  else if (servoDirection == SERVO_DOWN_RIGHT && topPos > topPosMin && bottomPos >= bottomPosMin)
   {
-       topPos = topPos + 10; 
-       bottomPos = bottomPos + 10; 
-  }  
-  
-  else if (servoDirection == SERVO_UP_RIGHT && topPos >= 110 && bottomPos  >= 20)
+    topPos = topPos - topServoIncrement;
+    bottomPos = bottomPos - bottomServoIncrement;
+  }
+
+  else if (servoDirection == SERVO_DOWN_LEFT && topPos > topPosMin && bottomPos <= bottomPosMax)
   {
-    bottomPos = bottomPos - 10;
-    topPos = topPos - 10; 
-  }  
-  
-  else if (servoDirection == SERVO_UP_LEFT && topPos >= 110 && bottomPos < 160)
+    topPos = topPos - topServoIncrement;
+    bottomPos = bottomPos + bottomServoIncrement;
+  }
+
+  else if (servoDirection == SERVO_UP_RIGHT && topPos <= topPosMax && bottomPos >= bottomPosMin)
   {
-    bottomPos = bottomPos + 10; 
-    topPos = topPos - 10; 
-  }  
-  
+    bottomPos = bottomPos - bottomServoIncrement;
+    topPos = topPos + topServoIncrement;
+  }
+
+  else if (servoDirection == SERVO_UP_LEFT && topPos <= topPosMax && bottomPos <= bottomPosMax)
+  {
+    bottomPos = bottomPos + bottomServoIncrement;
+    topPos = topPos + topServoIncrement;
+  }
+
   bottomServo.write(bottomPos);
   topServo.write(topPos);
-  }
-  
-  void changePinToggleState(byte pin_num, byte isOn)
-  { 
-   int pin_value = LOW;
-       
-   if (isOn == 1) pin_value = HIGH;
-   else if (isOn == 0) pin_value = LOW;
-   
-   switch(pin_num)
-   {
-     case 4:
-       pinMode(4, OUTPUT);
-       digitalWrite(4, isOn);
-       break;
-       
-     case 6:
-       pinMode(6, OUTPUT);
-       digitalWrite(6, isOn);
-       break;
-       
-     case 7:
-       pinMode(7, OUTPUT);
-       digitalWrite(7, isOn);     
-       break;
-       
-     case 8:
-       pinMode(8, OUTPUT);
-       digitalWrite(8, isOn);     
-       break;
-       
-     case 11:
-       pinMode(11, OUTPUT);
-       digitalWrite(11, isOn);     
-       break;
-       
-     case 12:
-       pinMode(12, OUTPUT);
-       digitalWrite(12, isOn);     
-       break;
-       
-     case 13:
-       pinMode(13, OUTPUT);     
-       digitalWrite(13, isOn);     
-       break;     
-   }
-   currentState = NOTHING; 
-  }
-  
-  void changePinPWMState(byte pin_num, byte value)
-  {
-   analogWrite(pin_num, value); 
-   currentState = NOTHING;
-  }
+}
+
+
