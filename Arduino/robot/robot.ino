@@ -524,7 +524,7 @@ void handleRobotIncomingMessage(byte incomingByte)
 
 void runMotor(byte motorSpeed, byte motorDirection, Adafruit_DCMotor *motor)
 {
-  motor->setSpeed(50);
+  motor->setSpeed(motorSpeed);
 
   switch (motorDirection) {
     case MOTOR_FORWARD:
