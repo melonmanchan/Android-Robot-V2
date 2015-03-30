@@ -25,6 +25,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -42,7 +43,8 @@ public class Settings extends ActionBarActivity {
 	private int cameraHeight;
 	private int cameraWidth;
 	private boolean isCameraEnabled;
-
+	private int selectedVideoSizeSpinnerIndex;
+	
 	private ApplicationState appState;
 	private BluetoothStreamManager btStreamManager;
 	private SharedPreferences sharedPref;
@@ -56,9 +58,11 @@ public class Settings extends ActionBarActivity {
 	
 	CheckBox isCameraEnabledCheckBox;
 	
+	Spinner videoFeedSizeSpinner;
 	
 	private BluetoothAdapter bluetoothAdapter;
 
+	private ArrayAdapter<CharSequence> spinnerAdapter;
 	
     private ArrayList<BluetoothDevice> bluetoothDevices;
     private BluetoothSocket bluetoothSocket;
@@ -79,24 +83,24 @@ public class Settings extends ActionBarActivity {
 		cameraIPAddress = sharedPref.getString("CAMERA_IP_ADDRESS", "127.0.0.1");
 		cameraPort = sharedPref.getString("CAMERA_PORT", "8080");
 		movementUpdateSpeed = sharedPref.getInt("BT_UPDATE_SPEED", 115);
-		cameraHeight = sharedPref.getInt("CAMERA_HEIGHT", 240);
-		cameraWidth = sharedPref.getInt("CAMERA_WIDTH", 320);
 		isCameraEnabled = sharedPref.getBoolean("IS_CAMERA_ENABLED", true);
-		
+		selectedVideoSizeSpinnerIndex = sharedPref.getInt("VIDEO_SIZE_SELECTED_INDEX", 0);
 		
 		cameraIPAddressTextView = (TextView) findViewById(R.id.cameraIPText);
 		cameraPortTextView = (TextView) findViewById(R.id.cameraPortText);
 		updateSpeedTextView = (TextView) findViewById(R.id.BTupdateSpeedText);
-		cameraHeightTextView = (TextView) findViewById(R.id.cameraHeightText);
-		cameraWidthTextView = (TextView) findViewById(R.id.cameraWidthText);
 		isCameraEnabledCheckBox = (CheckBox) findViewById(R.id.isCameraEnabledCheckBox);
+		videoFeedSizeSpinner = (Spinner) findViewById(R.id.feedSizeSpinner);
+		
+		spinnerAdapter = ArrayAdapter.createFromResource(this, R.array.video_size_array, android.R.layout.simple_spinner_dropdown_item);
+		
+		videoFeedSizeSpinner.setAdapter(spinnerAdapter);
 		
 		cameraIPAddressTextView.setText(cameraIPAddress);
 		cameraPortTextView.setText(String.valueOf(cameraPort));
 		updateSpeedTextView.setText(String.valueOf(movementUpdateSpeed));
-		cameraHeightTextView.setText(String.valueOf(cameraHeight));
-		cameraWidthTextView.setText(String.valueOf(cameraWidth));
 		isCameraEnabledCheckBox.setChecked(isCameraEnabled);
+		videoFeedSizeSpinner.setSelection(selectedVideoSizeSpinnerIndex);
 		
 		bluetoothDevices = new ArrayList<BluetoothDevice>();
 		initiateBluetooth();		
@@ -118,11 +122,12 @@ public class Settings extends ActionBarActivity {
 		editor.putString("CAMERA_IP_ADDRESS", cameraIPAddressTextView.getText().toString());
 		editor.putString("CAMERA_PORT", cameraPortTextView.getText().toString());
 		editor.putInt("BT_UPDATE_SPEED", Integer.parseInt(updateSpeedTextView.getText().toString()));
-		editor.putInt("CAMERA_HEIGHT", Integer.parseInt(cameraHeightTextView.getText().toString()));
-		editor.putInt("CAMERA_WIDTH", Integer.parseInt(cameraWidthTextView.getText().toString()));
 		editor.putBoolean("IS_CAMERA_ENABLED", isCameraEnabledCheckBox.isChecked());
+		editor.putInt("VIDEO_SIZE_SELECTED_INDEX", videoFeedSizeSpinner.getSelectedItemPosition());
+		// ????
 		
-		com.camera.simplemjpeg.MjpegView.setImageSize(Integer.parseInt(cameraWidthTextView.getText().toString()),  Integer.parseInt(cameraHeightTextView.getText().toString()));
+		String[] videoSize = videoFeedSizeSpinner.getSelectedItem().toString().split("x");
+		com.camera.simplemjpeg.MjpegView.setImageSize(Integer.parseInt(videoSize[0]),  Integer.parseInt(videoSize[1]));
 		
 		editor.commit();
 	}
@@ -198,6 +203,7 @@ public class Settings extends ActionBarActivity {
 
 		startActivity(intent);*/
 		String currentState = btStreamManager.getConnectionState();
+		
 		if (currentState == "connected")
 		{
 			Intent intent = new Intent(getApplicationContext(), Feed.class);

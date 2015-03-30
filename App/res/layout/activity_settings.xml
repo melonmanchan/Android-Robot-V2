@@ -83,38 +83,6 @@
         android:layout_alignRight="@+id/view1"
         android:text="@string/use_camera_" />
 
-    <EditText
-        android:id="@+id/cameraWidthText"
-        android:layout_width="75dp"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/cameraWidthText"
-        android:layout_alignRight="@+id/textView4"
-        android:layout_below="@+id/textView4"
-        android:ems="10"
-        android:inputType="number" >
-
-        <requestFocus />
-    </EditText>
-
-    <TextView
-        android:id="@+id/TextView01"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/cameraHeightText"
-        android:layout_toRightOf="@+id/cameraIPText"
-        android:text="@string/video_height"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <EditText
-        android:id="@+id/cameraHeightText"
-        android:layout_width="75dp"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/BTupdateSpeedText"
-        android:layout_alignBottom="@+id/BTupdateSpeedText"
-        android:layout_alignLeft="@+id/cameraWidthText"
-        android:ems="10"
-        android:inputType="number" />
-
     <Button
         android:id="@+id/feedButton"
         android:layout_width="wrap_content"
@@ -126,16 +94,6 @@
         android:onClick="switchToFeed"
         android:text="@string/go_to_feed" />
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textView2"
-        android:layout_alignBottom="@+id/textView2"
-        android:layout_alignRight="@+id/TextView01"
-        android:text="@string/video_width"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <Button
         android:id="@+id/findNewDevices"
         android:layout_width="wrap_content"
@@ -144,5 +102,21 @@
         android:layout_alignLeft="@+id/textView1"
         android:onClick="checForAvailableBLEDevices"
         android:text="@string/find_new_devices" />
+
+    <Spinner
+        android:id="@+id/feedSizeSpinner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView3"
+        android:layout_toRightOf="@+id/findNewDevices" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/feedSizeSpinner"
+        android:layout_toRightOf="@+id/cameraIPText"
+        android:text="@string/video_spinner_msg"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
 </RelativeLayout>
