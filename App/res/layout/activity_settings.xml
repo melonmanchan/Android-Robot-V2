@@ -74,15 +74,6 @@
         android:inputType="number"
         android:text="@string/default_bt_update_speed" />
 
-    <TextView
-        android:id="@+id/textView4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/cameraPortText"
-        android:layout_toRightOf="@+id/cameraIPText"
-        android:text="@string/video_width"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
     <CheckBox
         android:id="@+id/isCameraEnabledCheckBox"
         android:layout_width="wrap_content"
@@ -130,17 +121,27 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/BTupdateSpeedText"
         android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/findNewDevices"
         android:layout_marginBottom="24dp"
         android:onClick="switchToFeed"
         android:text="@string/go_to_feed" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textView2"
+        android:layout_alignBottom="@+id/textView2"
+        android:layout_alignRight="@+id/TextView01"
+        android:text="@string/video_width"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <Button
         android:id="@+id/findNewDevices"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_above="@+id/feedButton"
         android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/BTupdateSpeedText"
-        android:layout_marginTop="16dp"
         android:onClick="checForAvailableBLEDevices"
         android:text="@string/find_new_devices" />
 

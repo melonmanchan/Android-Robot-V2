@@ -266,7 +266,7 @@ public class Feed extends ActionBarActivity {
             	
             	axisForce = (byte) (byte)(127 * tempPower/100);
             	
-            	axisForce = (byte) ((byte) axisForce * 0.5);
+            	axisForce = (byte) ((byte) axisForce * 0.8);
             	
                 switch (direction) {
                 
