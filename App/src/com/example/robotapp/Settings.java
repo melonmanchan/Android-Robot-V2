@@ -40,8 +40,6 @@ public class Settings extends ActionBarActivity {
 	private String cameraIPAddress;
 	private String cameraPort;
 	private int movementUpdateSpeed;
-	private int cameraHeight;
-	private int cameraWidth;
 	private boolean isCameraEnabled;
 	private int selectedVideoSizeSpinnerIndex;
 	
@@ -87,7 +85,7 @@ public class Settings extends ActionBarActivity {
 		selectedVideoSizeSpinnerIndex = sharedPref.getInt("VIDEO_SIZE_SELECTED_INDEX", 0);
 		
 		cameraIPAddressTextView = (TextView) findViewById(R.id.cameraIPText);
-		cameraPortTextView = (TextView) findViewById(R.id.cameraPortText);
+		//cameraPortTextView = (TextView) findViewById(R.id.cameraPortText);
 		updateSpeedTextView = (TextView) findViewById(R.id.BTupdateSpeedText);
 		isCameraEnabledCheckBox = (CheckBox) findViewById(R.id.isCameraEnabledCheckBox);
 		videoFeedSizeSpinner = (Spinner) findViewById(R.id.feedSizeSpinner);
@@ -97,7 +95,7 @@ public class Settings extends ActionBarActivity {
 		videoFeedSizeSpinner.setAdapter(spinnerAdapter);
 		
 		cameraIPAddressTextView.setText(cameraIPAddress);
-		cameraPortTextView.setText(String.valueOf(cameraPort));
+		//cameraPortTextView.setText(String.valueOf(cameraPort));
 		updateSpeedTextView.setText(String.valueOf(movementUpdateSpeed));
 		isCameraEnabledCheckBox.setChecked(isCameraEnabled);
 		videoFeedSizeSpinner.setSelection(selectedVideoSizeSpinnerIndex);
@@ -120,7 +118,7 @@ public class Settings extends ActionBarActivity {
 		SharedPreferences.Editor editor = sharedPref.edit();
 		
 		editor.putString("CAMERA_IP_ADDRESS", cameraIPAddressTextView.getText().toString());
-		editor.putString("CAMERA_PORT", cameraPortTextView.getText().toString());
+		//editor.putString("CAMERA_PORT", cameraPortTextView.getText().toString());
 		editor.putInt("BT_UPDATE_SPEED", Integer.parseInt(updateSpeedTextView.getText().toString()));
 		editor.putBoolean("IS_CAMERA_ENABLED", isCameraEnabledCheckBox.isChecked());
 		editor.putInt("VIDEO_SIZE_SELECTED_INDEX", videoFeedSizeSpinner.getSelectedItemPosition());
@@ -209,7 +207,7 @@ public class Settings extends ActionBarActivity {
 			Intent intent = new Intent(getApplicationContext(), Feed.class);
 			intent.putExtra("BT_UPDATE_SPEED", Integer.parseInt(updateSpeedTextView.getText().toString()));
 			intent.putExtra("CAMERA_IP_ADDRESS", cameraIPAddressTextView.getText().toString());
-			intent.putExtra("CAMERA_PORT", cameraPortTextView.getText().toString());
+			//intent.putExtra("CAMERA_PORT", cameraPortTextView.getText().toString());
 			intent.putExtra("IS_CAMERA_ENABLED", isCameraEnabledCheckBox.isChecked());
 			
 			startActivity(intent);

@@ -89,7 +89,7 @@ public class Feed extends ActionBarActivity {
 			else {
 				movementUpdateSpeed = extras.getInt("BT_UPDATE_SPEED");
 				videoIpAddress = extras.getString("CAMERA_IP_ADDRESS");
-				videoPort = extras.getString("CAMERA_PORT");
+				videoPort = "5000";
 				isCameraEnabled = extras.getBoolean("IS_CAMERA_ENABLED");
 
 			}
@@ -495,10 +495,12 @@ public class Feed extends ActionBarActivity {
 				socket = new Socket( params[0], Integer.valueOf( params[1]));
 	    		return (new MjpegInputStream(socket.getInputStream()));
 			} catch (UnknownHostException e) {
+				Toast.makeText(getApplicationContext(), "Something went wrong with webcam connecting!", Toast.LENGTH_LONG).show();
 				// TODO Auto-generated catch block
 				System.out.println(e.getMessage());
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
+				Toast.makeText(getApplicationContext(), "Something went wrong with webcam connecting!", Toast.LENGTH_LONG).show();
 				System.out.println(e.getMessage());
 			}
     		return null;
