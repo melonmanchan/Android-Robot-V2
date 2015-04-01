@@ -17,7 +17,9 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.camera.simplemjpeg.*;
 public class Feed extends ActionBarActivity {
@@ -58,6 +60,10 @@ public class Feed extends ActionBarActivity {
 	private Handler movementHandler;
 	private Runnable movementRunnable;
 	
+	private Handler signalStrengthHandler;
+	private Runnable signalStrengthRunnable;
+	private int signalUpdateSpeed = 1000;
+	
 	// Options, received from Settings activity
 	private int movementUpdateSpeed;
 	private String videoIpAddress = "192.168.0.5";
@@ -68,6 +74,7 @@ public class Feed extends ActionBarActivity {
 	private JoystickView leftJoystick;
 	private JoystickView rightJoystick;
 	private MjpegView videoFeed = null;
+	private TextView signalStrengthText;
 	
 	private ApplicationState appState;
 	private BluetoothStreamManager btStreamManager;
@@ -78,6 +85,8 @@ public class Feed extends ActionBarActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_feed);
 		
 		if (savedInstanceState == null) {
@@ -100,6 +109,7 @@ public class Feed extends ActionBarActivity {
 		btStreamManager.setCurrentActivity(this);
 		leftJoystick = (JoystickView) findViewById(R.id.leftJoystick);
 		rightJoystick = (JoystickView) findViewById(R.id.rightJoystick);
+		signalStrengthText = (TextView) findViewById(R.id.signalText);
 		
 		System.out.println("Initiating  motorcommand!");
 		
@@ -133,6 +143,7 @@ public class Feed extends ActionBarActivity {
 		System.out.println("changed activity");
 		btStreamManager.setCurrentActivity(this);
 		movementHandler.postDelayed(movementRunnable, movementUpdateSpeed);
+		signalStrengthHandler.postDelayed(signalStrengthRunnable, signalUpdateSpeed);
 		if (videoFeed != null)
 		{
 			videoFeed.resumePlayback();
@@ -146,6 +157,7 @@ public class Feed extends ActionBarActivity {
 			videoFeed.stopPlayback();
 		}
 		movementHandler.removeCallbacks(movementRunnable);
+		signalStrengthHandler.removeCallbacks(signalStrengthRunnable);
 	}
 	
 	
@@ -153,6 +165,7 @@ public class Feed extends ActionBarActivity {
 	protected void onStop() {
 		super.onStop();
 		movementHandler.removeCallbacks(movementRunnable);
+		signalStrengthHandler.removeCallbacks(signalStrengthRunnable);
 	}
 	
 	protected void onDestroy() {
@@ -167,6 +180,7 @@ public class Feed extends ActionBarActivity {
 	private void initiateMovementHandlers() {
 		
 		movementHandler = new Handler();
+		signalStrengthHandler = new Handler();
 		movementRunnable = new Runnable() {
 			public void run() {
 
@@ -216,12 +230,29 @@ public class Feed extends ActionBarActivity {
 					motorStateChanged = false;
 					wasStopCommandSent = false;
 				}
+				
 				movementHandler.postDelayed(movementRunnable, movementUpdateSpeed);
 							
 			}
 		};
 		movementHandler.postDelayed(movementRunnable, movementUpdateSpeed);
 		
+		signalStrengthRunnable = new Runnable() {
+
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				Feed.this.runOnUiThread(new Runnable() {
+				    public void run() {
+				    	signalStrengthText.setText("Signal strength: " + btStreamManager.getSignalStrength());
+				    }
+				});
+				
+				signalStrengthHandler.postDelayed(signalStrengthRunnable, signalUpdateSpeed);
+			}
+			
+		};
+		signalStrengthHandler.postDelayed(signalStrengthRunnable, signalUpdateSpeed);
 	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -412,6 +443,7 @@ public class Feed extends ActionBarActivity {
 	    			videoFeed.stopPlayback();
 	    		}
 	    		movementHandler.removeCallbacks(movementRunnable);
+	    		signalStrengthHandler.removeCallbacks(signalStrengthRunnable);
 	            Intent menuIntent = new Intent(this, Settings.class);
 	            startActivity(menuIntent);
 	            return true;
@@ -486,6 +518,7 @@ public class Feed extends ActionBarActivity {
 	{
 		new DoRead().execute( videoIpAddress, videoPort);
 	}
+	
 	
 	
     public class DoRead extends AsyncTask<String, Void, MjpegInputStream> {

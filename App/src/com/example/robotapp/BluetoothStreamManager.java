@@ -46,6 +46,8 @@ public class BluetoothStreamManager {
 
     private int connectionState = STATE_DISCONNECTED;
 
+    private int signalStrength;
+    
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
@@ -110,7 +112,7 @@ public class BluetoothStreamManager {
             } else {
               //  Log.w(TAG, "onServicesDiscovered received: " + status);
             	
-            	Log.i(TAG, "onServicesDiscovered odd status = " + status);
+            	//Log.i(TAG, "onServicesDiscovered odd status = " + status);
             }
         }
 
@@ -120,7 +122,7 @@ public class BluetoothStreamManager {
                                          int status) {
            if (status == BluetoothGatt.GATT_SUCCESS) {
                // broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-        	   Log.i(TAG, "Data available: " + characteristic.toString());
+        	  // Log.i(TAG, "Data available: " + characteristic.toString());
             }
         }
 
@@ -128,7 +130,7 @@ public class BluetoothStreamManager {
         public void onCharacteristicChanged(BluetoothGatt gatt,
                                             BluetoothGattCharacteristic characteristic) {
            // broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
-     	   Log.i(TAG, "Data available: " + characteristic.toString());
+     	  // Log.i(TAG, "Data available: " + characteristic.toString());
 
         }
         
@@ -137,15 +139,22 @@ public class BluetoothStreamManager {
         {
         	if (status == BluetoothGatt.GATT_SUCCESS)
         	{
-        		Log.i(TAG,"Write success!");
+        		//Log.i(TAG,"Write success!");
         	}
+        }
+        
+        @Override
+        public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status)
+        {
+        	if (status == BluetoothGatt.GATT_SUCCESS)
+        		signalStrength = rssi;
         }
     };
 	
 	
 	public BluetoothStreamManager()
 	{
-		Log.i(TAG,"BluetoothStreamManager constructor!");
+		//Log.i(TAG,"BluetoothStreamManager constructor!");
 
 		deviceAddress = "";
 		//commandQueue = new ConcurrentLinkedQueue<byte[]>();
@@ -258,6 +267,18 @@ public class BluetoothStreamManager {
 		return true;
 	}
 	
+	public int getSignalStrength()
+	{
+		if (getConnectionState() == "connected")
+		{
+			if (bluetoothGatt.readRemoteRssi());
+				return signalStrength;
+		
+		}
+		
+		return 0;
+	}
+	
 	public String getConnectionState()
 	{
 		switch(connectionState)
@@ -285,7 +306,7 @@ public class BluetoothStreamManager {
 			
 			if (rxService == null)
 			{
-				Log.i(TAG, "rxService is null at streammanager!");
+				//Log.i(TAG, "rxService is null at streammanager!");
 				return;
 			}
 			
@@ -293,7 +314,7 @@ public class BluetoothStreamManager {
 			
 			if (RxChar == null)
 			{
-				Log.i(TAG, "RxChar is null at streammanager!");
+				//Log.i(TAG, "RxChar is null at streammanager!");
 				return;
 			}
 			RxChar.setValue(data);
