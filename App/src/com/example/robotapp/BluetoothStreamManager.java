@@ -24,6 +24,8 @@ import android.util.Log;
 import android.widget.Toast;
 import android.app.Service;
 
+
+
 public class BluetoothStreamManager {
 	
     private final static String TAG = BluetoothStreamManager.class.getSimpleName();
@@ -47,6 +49,8 @@ public class BluetoothStreamManager {
     private int connectionState = STATE_DISCONNECTED;
 
     private int signalStrength;
+    private float maxSignalStrength = -50;
+    private float minSignalStrenght = -100;
     
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
@@ -147,7 +151,21 @@ public class BluetoothStreamManager {
         public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status)
         {
         	if (status == BluetoothGatt.GATT_SUCCESS)
-        		signalStrength = rssi;
+        	{
+        		if (rssi <= -100)
+        		{
+        			signalStrength = 0;
+        		}
+        		else if (rssi >= -50)
+        		{
+        			signalStrength = 100;
+        		}
+        		else
+        		{
+        			signalStrength = 2 * (rssi + 100);
+        		}
+        		
+        	}
         }
     };
 	

@@ -22,7 +22,7 @@ Adafruit_DCMotor *rightMotor = motorShield.getMotor(2);
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
 int eye_pupil_color = 12314;
-int eye_ball_color = 23142;
+int eye_ball_color = 0xFFFF;
 
 Adafruit_NeoMatrix eyematrix = Adafruit_NeoMatrix(8, 8, EYE_PIN,
                                NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
@@ -50,12 +50,12 @@ byte topPos = 25;
 byte bottomPosMax = 175;
 byte bottomPosMin = 15;
 
-byte topPosMax = 100;
+byte topPosMax = 60;
 byte topPosMin = 25;
 
 // How much to move servo position on each motor command
-byte topServoIncrement = 5;
-byte bottomServoIncrement = 5;
+byte topServoIncrement = 2;
+byte bottomServoIncrement = 2;
 
 // Timers used to "simulate" threading
 unsigned long eyeTimer;
@@ -139,6 +139,7 @@ int8_t dY   = 0;   // Distance from prior to new position
 byte mouthIndex = 0;
 boolean isMouthAnimationPlayingBackwards = false;
 // different mouth positions
+/*
 static const uint8_t mouthPos[][5] PROGMEM =
 {
   {
@@ -169,6 +170,41 @@ static const uint8_t mouthPos[][5] PROGMEM =
     0x0,
     0x0,
     0x55
+  }
+};
+*/
+
+// Testing other mouth without zig-zag position
+static const uint8_t mouthPos[][5] PROGMEM =
+{
+  {
+    0xff,
+    0xff,
+    0xff,
+    0xff,
+    0xff
+  },
+  {
+    0xff,
+    0xff,
+    0x0,
+    0xff,
+    0xff
+  },
+  {
+    // open maw for mouth pos 1
+    0xff,
+    0x0,
+    0x0,
+    0x0,
+    0xff
+  },
+  {
+    0x0,
+    0x0,
+    0x0,
+    0x0,
+    0x0
   }
 };
 
@@ -215,10 +251,10 @@ void setup() {
   motorShield.begin();
   Serial.begin(9600);
   eyematrix.begin();
-  eyematrix.setBrightness(1);
+  eyematrix.setBrightness(20);
 
   mouthmatrix.begin();
-  mouthmatrix.setBrightness(1);
+  mouthmatrix.setBrightness(20);
   resetRobotMouth();
   BTLEserial.setDeviceName("ROBOT"); /* 7 characters max! */
 
@@ -236,6 +272,7 @@ void setup() {
 
   while (Serial.read() != ':');   // When the Emic 2 has initialized and is ready, it will send a single ':' character, so wait here until we receive it
   delay(10);                          // Short delay
+  
   Serial.flush();                 // Flush the receive buffer
   Serial.println("V18");
   
@@ -256,7 +293,7 @@ void loop() {
   mouthAcc += mouthTimer - mouthLastTimer;
   mouthLastTimer = mouthTimer;
 
-  while (eyeAcc >= 70)
+  while (eyeAcc >= 50)
   {
     animateEyes();
     eyeAcc = 0;
@@ -273,6 +310,9 @@ void loop() {
       {
         resetRobotMouth();
         isTransmittingMessage = false;
+        memset(&robotMessage[0], 0, sizeof(robotMessage));
+       
+
         //mouthSerial.println(mouth);
       }
     }
@@ -510,15 +550,15 @@ void handleRobotIncomingMessage(byte incomingByte)
     String messageAsString(robotMessage);
     //mouthSerial.println("$$$ALL,OFF");
     Serial.print('S');
-    Serial.print(messageAsString);
-    Serial.print('\n');
+    Serial.println(messageAsString);
+    
+    //Serial.print('\n');
     messageStartTime = millis();
     messageEstimatedTime = messageAsString.length() * 150;
     isTransmittingMessage = true;
     currentState = NOTHING;
     robotMessageIndex = 0;
     // most efficient way to reallocate a char array to null.
-    memset(&robotMessage[0], 0, sizeof(robotMessage));
   }
 }
 

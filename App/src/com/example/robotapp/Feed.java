@@ -224,7 +224,7 @@ public class Feed extends ActionBarActivity {
 					
 					//btStreamManager.push(temp);
 					
-					btStreamManager.writeData(temp);
+					//btStreamManager.writeData(temp);
 					
 					servoStateChanged = false;
 					motorStateChanged = false;
@@ -241,16 +241,18 @@ public class Feed extends ActionBarActivity {
 
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
-				Feed.this.runOnUiThread(new Runnable() {
-				    public void run() {
-				    	signalStrengthText.setText("Signal strength: " + btStreamManager.getSignalStrength());
-				    }
-				});
-				
-				signalStrengthHandler.postDelayed(signalStrengthRunnable, signalUpdateSpeed);
+				if (!isTransmittingMessage)
+				{
+					// TODO Auto-generated method stub
+					Feed.this.runOnUiThread(new Runnable() {
+					    public void run() {
+					    	signalStrengthText.setText("Signal strength: " + btStreamManager.getSignalStrength() + "%" );
+					    }
+					});
+					
+					signalStrengthHandler.postDelayed(signalStrengthRunnable, signalUpdateSpeed);
+				}
 			}
-			
 		};
 		signalStrengthHandler.postDelayed(signalStrengthRunnable, signalUpdateSpeed);
 	}
@@ -454,7 +456,7 @@ public class Feed extends ActionBarActivity {
 	
 	public void openMessagePrompt(View view)
 	{
-		
+		isTransmittingMessage = true;
 		final EditText messageEditText = new EditText(this);
 		
 		// Build a dialog box to get user input
@@ -481,10 +483,13 @@ public class Feed extends ActionBarActivity {
 	            {
 	            	Toast.makeText(getApplicationContext(), "Message must be under 35 characters!", Toast.LENGTH_LONG).show();
 	            }
+	            
+	            isTransmittingMessage = false;
 	        }
 	    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 	        public void onClick(DialogInterface dialog, int whichButton) {
 	            // Do nothing.
+	        	isTransmittingMessage = false;
 	        	return;
 	        }
 	    }).show();
@@ -493,23 +498,29 @@ public class Feed extends ActionBarActivity {
  
 	private void sendMessageToRobot(String message)
 	{
-		isTransmittingMessage = true;
+		
 		// "z" is the ascii equivelant of 123, which is the message starting delimiter. "\n" is the ending delimiter.
 		message.replace('\n', ' ');
-		message = "z" + message + "\n";
-		try {
-			byte[] messageBytes = message.getBytes("US-ASCII");
-			btStreamManager.writeData(messageBytes);
-			Thread.sleep(message.length() * 160);
-			isTransmittingMessage = false;
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			Toast.makeText(getApplicationContext(), "Ascii only, please!", Toast.LENGTH_SHORT).show();
-		}
-		catch (InterruptedException e) {
-			
-		}
+		
+		String[] msgStringParts = splitString("z" + message + "\n", 6);
+		
+		for (String msg : msgStringParts)
+		{
+			try {
+				byte[] messageBytes = msg.getBytes("US-ASCII");
+				btStreamManager.writeData(messageBytes);
+				//Thread.sleep(message.length() * 160);
+				isTransmittingMessage = false;
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				Toast.makeText(getApplicationContext(), "Ascii only, please!", Toast.LENGTH_SHORT).show();
+			}
+			/*catch (InterruptedException e) {
 				
+			}*/
+		}
+		
+		isTransmittingMessage = false;
 	}
 	
 
@@ -550,6 +561,21 @@ public class Feed extends ActionBarActivity {
            videoFeed.showFps(true);
         }
     }
-	
-	
+    
+	// helper function to split up robot message efficiently
+	public String[] splitString(String s, int interval)
+	{
+	    int arrayLength = (int) Math.ceil(((s.length() / (double)interval)));
+	    String[] result = new String[arrayLength];
+
+	    int j = 0;
+	    int lastIndex = result.length - 1;
+	    for (int i = 0; i < lastIndex; i++) {
+	        result[i] = s.substring(j, j + interval);
+	        j += interval;
+	    } //Add the last bit
+	    result[lastIndex] = s.substring(j);
+
+	    return result;
+	}
 }
