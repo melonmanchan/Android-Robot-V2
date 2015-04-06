@@ -224,7 +224,7 @@ public class Feed extends ActionBarActivity {
 					
 					//btStreamManager.push(temp);
 					
-					//btStreamManager.writeData(temp);
+					btStreamManager.writeData(temp);
 					
 					servoStateChanged = false;
 					motorStateChanged = false;

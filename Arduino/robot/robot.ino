@@ -54,8 +54,8 @@ byte topPosMax = 60;
 byte topPosMin = 25;
 
 // How much to move servo position on each motor command
-byte topServoIncrement = 2;
-byte bottomServoIncrement = 2;
+byte topServoIncrement = 5;
+byte bottomServoIncrement = 5;
 
 // Timers used to "simulate" threading
 unsigned long eyeTimer;
@@ -272,10 +272,10 @@ void setup() {
 
   while (Serial.read() != ':');   // When the Emic 2 has initialized and is ready, it will send a single ':' character, so wait here until we receive it
   delay(10);                          // Short delay
-  
+
   Serial.flush();                 // Flush the receive buffer
   Serial.println("V18");
-  
+
 }
 
 void loop() {
@@ -306,31 +306,16 @@ void loop() {
     {
       animateMouth();
 
+
       if (messageCurrentTime - messageStartTime >= messageEstimatedTime)
       {
         resetRobotMouth();
         isTransmittingMessage = false;
         memset(&robotMessage[0], 0, sizeof(robotMessage));
-       
-
-        //mouthSerial.println(mouth);
       }
     }
     mouthAcc = 0;
   }
-
-  /*
-  if (isTransmittingMessage)
-  {
-
-
-    if (messageCurrentTime - messageStartTime >= messageEstimatedTime)
-    {
-         noTone(5);
-         //mouthSerial.println(mouth);
-         isTransmittingMessage = false;
-    }
-  }*/
 }
 
 void animateEyes() {
@@ -465,19 +450,7 @@ void handleSerialInput()
       }
 
     }
-    /*
-    else if (incomingByte == PIN_TOGGLE_DELIMITER && currentState == NOTHING)
-    {
-     currentState = TOGGLE;
-     return;
-    }
 
-    else if (incomingByte == PIN_PWM_DELIMITER && currentState == NOTHING)
-    {
-     currentState = PINPWM;
-     return;
-    }
-    */
     if (currentState == MOTOR)
     {
 
@@ -551,7 +524,7 @@ void handleRobotIncomingMessage(byte incomingByte)
     //mouthSerial.println("$$$ALL,OFF");
     Serial.print('S');
     Serial.println(messageAsString);
-    
+
     //Serial.print('\n');
     messageStartTime = millis();
     messageEstimatedTime = messageAsString.length() * 150;
