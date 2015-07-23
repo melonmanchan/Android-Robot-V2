@@ -105,22 +105,13 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignLeft="@+id/textView1"
-            android:layout_alignParentTop="true"
-            android:text="Step 1. Play with settings"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
             android:id="@+id/textView5"
-            android:layout_margin="10dp"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/feedButton"
-            android:layout_alignLeft="@+id/textView4"
+            android:layout_alignLeft="@+id/feedButton"
             android:layout_alignRight="@+id/feedButton"
+            android:layout_margin="10dp"
             android:text="Step 3. Start driving!"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -141,6 +132,16 @@
             android:layout_above="@+id/findNewDevices"
             android:layout_alignRight="@+id/textView2"
             android:text="Step 2. Connect to robot"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/textView1"
+            android:layout_alignLeft="@+id/textView1"
+            android:layout_marginBottom="31dp"
+            android:text="Step 1. Play with settings"
             android:textAppearance="?android:attr/textAppearanceLarge" />
     
 </RelativeLayout>
