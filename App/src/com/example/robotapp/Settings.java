@@ -188,18 +188,6 @@ public class Settings extends ActionBarActivity {
 	
 	public void switchToFeed(View view)
 	{
-	/*	if (btStreamManager.getInputStream() == null)
-		{
-			Toast.makeText(getApplicationContext(), "You must have a valid bluetooth device paired to continue!", Toast.LENGTH_LONG).show();
-			return;
-		}
-		Intent intent = new Intent(getApplicationContext(), Feed.class);
-		intent.putExtra("BT_UPDATE_SPEED", Integer.parseInt(updateSpeedTextView.getText().toString()));
-		intent.putExtra("CAMERA_IP_ADDRESS", cameraIPAddressTextView.getText().toString());
-		intent.putExtra("CAMERA_PORT", cameraPortTextView.getText().toString());
-		intent.putExtra("IS_CAMERA_ENABLED", isCameraEnabledCheckBox.isChecked());
-
-		startActivity(intent);*/
 		String currentState = btStreamManager.getConnectionState();
 		
 		if (currentState == "connected")
