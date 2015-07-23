@@ -27,7 +27,7 @@
             android:configChanges="keyboardHidden|orientation"
             android:screenOrientation="portrait"
             android:label="Cool robot"
-            android:windowSoftInputMode="adjustPan" >
+            android:windowSoftInputMode="stateHidden|adjustPan" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

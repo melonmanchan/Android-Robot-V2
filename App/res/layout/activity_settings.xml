@@ -7,8 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.robotapp.Settings" >
-
+    tools:context="com.example.robotapp.Settings">
 
     <View
         android:id="@+id/topbar"
@@ -115,22 +114,12 @@
             android:text="Step 3. Start driving!"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <Button
-            android:id="@+id/findNewDevices"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/textView5"
-            android:layout_alignRight="@+id/BTupdateSpeedText"
-            android:layout_marginBottom="47dp"
-            android:onClick="checForAvailableBLEDevices"
-            android:text="@string/find_new_devices" />
-
         <TextView
             android:id="@+id/textView4"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_above="@+id/findNewDevices"
-            android:layout_alignRight="@+id/textView2"
+            android:layout_alignRight="@+id/textView3"
             android:text="Step 2. Connect to robot"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -141,7 +130,17 @@
             android:layout_alignBottom="@+id/textView1"
             android:layout_alignLeft="@+id/textView1"
             android:layout_marginBottom="31dp"
-            android:text="Step 1. Play with settings"
+            android:text="Step 1. Set things up!"
             android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <Button
+            android:id="@+id/findNewDevices"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/textView5"
+            android:layout_alignRight="@+id/BTupdateSpeedText"
+            android:layout_marginBottom="25dp"
+            android:onClick="checForAvailableBLEDevices"
+            android:text="@string/find_new_devices" />
     
 </RelativeLayout>
