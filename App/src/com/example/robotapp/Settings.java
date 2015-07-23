@@ -29,7 +29,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class Settings extends ActionBarActivity {
+public class Settings extends Activity {
 
 	private final static int REQUEST_ENABLE_BT = 1;
     private static final int REQUEST_SELECT_DEVICE = 2;
