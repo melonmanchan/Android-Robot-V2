@@ -104,26 +104,6 @@
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <TextView
-            android:id="@+id/textView5"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/feedButton"
-            android:layout_alignLeft="@+id/feedButton"
-            android:layout_alignRight="@+id/feedButton"
-            android:layout_margin="10dp"
-            android:text="Step 3. Start driving!"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
-            android:id="@+id/textView4"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/findNewDevices"
-            android:layout_alignRight="@+id/textView3"
-            android:text="Step 2. Connect to robot"
-            android:textAppearance="?android:attr/textAppearanceLarge" />
-
-        <TextView
             android:id="@+id/textView2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -142,5 +122,24 @@
             android:layout_marginBottom="25dp"
             android:onClick="checForAvailableBLEDevices"
             android:text="@string/find_new_devices" />
+
+        <TextView
+            android:id="@+id/textView5"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/feedButton"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="10dp"
+            android:text="Step 3. Start driving!"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/textView4"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/findNewDevices"
+            android:layout_alignLeft="@+id/textView5"
+            android:text="Step 2. Connect to robot"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
     
 </RelativeLayout>
