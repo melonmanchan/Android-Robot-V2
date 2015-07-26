@@ -187,24 +187,6 @@ public class Feed extends ActionBarActivity {
 				// don't send motor command while message command is still transmitting
 				if (!isTransmittingMessage)
 				{
-					/*
-					boolean tempServoStateChanged = servoStateChanged;
-					boolean tempMotorStateChanged = motorStateChanged;
-					
-					if (tempServoStateChanged == false && tempMotorStateChanged == false)
-					{
-						// send stop command only once, no need to spam the bluetooth module if we're not moving anywhere.
-						if (wasStopCommandSent == false)
-						{
-							btStreamManager.writeData(stopCommand);
-							wasStopCommandSent = true;
-							System.out.println("Stop!!");
-						}
-						
-						return;
-					
-					}*/
-					
 					// motorCommand to temp variable so it doesn't change while the function is not yet finished
 					byte[] temp = motorCommand;
 					
@@ -221,9 +203,7 @@ public class Feed extends ActionBarActivity {
 						temp[3] = MOTOR_RELEASE;
 						temp[4] = 0;// no motor movement
 					}
-					
-					//btStreamManager.push(temp);
-					
+										
 					btStreamManager.writeData(temp);
 					
 					servoStateChanged = false;
