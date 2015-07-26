@@ -1,12 +1,7 @@
 package com.example.robotapp;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
-
-import com.nordicsemi.nrfUARTv2.UartService;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -22,8 +17,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
-import android.app.Service;
-
 
 
 public class BluetoothStreamManager {
@@ -59,10 +52,7 @@ public class BluetoothStreamManager {
     
 	// Queue data structure to hold robot commands in byte array form
 	private ConcurrentLinkedQueue<byte[]> commandQueue;
-		// Seperate thread to keep running in background during the whole she-bang, running new commands if necessary. Thread is best implementation of
-	// threading in Android for this use-case imo. AsyncTask too bulky, only for "short" asynchronous tasks. Don't see a need to update UI thread from here.
-	// Thread seems to be the fastest implementation
-	
+
 	//Callback function to call on connection
     private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
         @Override
@@ -172,68 +162,8 @@ public class BluetoothStreamManager {
 	
 	public BluetoothStreamManager()
 	{
-		//Log.i(TAG,"BluetoothStreamManager constructor!");
-
 		deviceAddress = "";
-		//commandQueue = new ConcurrentLinkedQueue<byte[]>();
-		/*workThread = new Thread()
-		{
-			@Override
-		    public void run() {
-			        Log.i(TAG, "Hello world");
-				if (connectionState == STATE_CONNECTED)
-				{
-					
-					try 
-				    	{
-					        		while(!Thread.interrupted())
-					        		{
-										if (!commandQueue.isEmpty())
-										{
-												Log.i(TAG, "===============================");
-												byte[] msgBuffer = commandQueue.poll();
-												writeData(msgBuffer);
-												Log.i(TAG, "===============================");
-	
-										}
-										
-					        		}
-								
-						}
-				        catch (Exception ex) {
-				        	Log.i(TAG, "IOError!");
-				        	
-				        	currentActivity.runOnUiThread(new Runnable() {
-				        	    public void run() {
-				        	    	
-				        	       new AlertDialog.Builder(currentActivity).setTitle("Bluetooth failed!")
-				        	       .setMessage("Fuck! The bluetooth connection has failed. Go back to settings and initiate a new connection?").setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-				        	           public void onClick(DialogInterface dialog, int which) { 
-				        	               // Go back to settings
-				        	        	   Intent intent = new Intent(currentActivity, Settings.class);
-				        	       		   currentActivity.startActivity(intent);
-				        	        	   
-				        	           }
-				        	        })
-				        	       .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-				        	           public void onClick(DialogInterface dialog, int which) { 
-				        	               // do nothing
-				        	        	   return ;
-				        	           }
-				        	        })
-				        	       .setIcon(android.R.drawable.ic_dialog_alert)
-				        	        .show();
-				        	       
-				        	    }
-				        	});
-				        }
-			}
-				else {
-				}
-			}*/
-		//};
 	}
-	
 	
 	public boolean initializeBluetoothAdapter()
 	{
@@ -262,11 +192,6 @@ public class BluetoothStreamManager {
 			showToast("BluetoothAdapter is not initialized or address is not legit");
 			return false;
 		}
-		
-	/*	if (currentDeviceAddress != null && address.equalsIgnoreCase(currentDeviceAddress) && bluetoothGatt != null)
-		{
-			
-		}*/
 		
 		BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 		
@@ -344,8 +269,6 @@ public class BluetoothStreamManager {
 	{
 		Toast.makeText(currentActivity, message, Toast.LENGTH_LONG).show();
 	}
-	
-	
 
 	public String getDeviceAddress()
 	{
