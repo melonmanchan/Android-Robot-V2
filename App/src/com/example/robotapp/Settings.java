@@ -6,11 +6,13 @@ import java.util.UUID;
 
 import android.support.v7.app.ActionBarActivity;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -24,6 +26,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -39,6 +42,9 @@ public class Settings extends Activity {
 
 	private String cameraIPAddress;
 	private String cameraPort;
+	
+	private String[] emotes;
+	
 	private int movementUpdateSpeed;
 	private boolean isCameraEnabled;
 	private int selectedVideoSizeSpinnerIndex;
@@ -83,6 +89,8 @@ public class Settings extends Activity {
 		movementUpdateSpeed = sharedPref.getInt("BT_UPDATE_SPEED", 115);
 		isCameraEnabled = sharedPref.getBoolean("IS_CAMERA_ENABLED", true);
 		selectedVideoSizeSpinnerIndex = sharedPref.getInt("VIDEO_SIZE_SELECTED_INDEX", 0);
+		loadEmotes(sharedPref);
+		
 		
 		cameraIPAddressTextView = (TextView) findViewById(R.id.cameraIPText);
 		//cameraPortTextView = (TextView) findViewById(R.id.cameraPortText);
@@ -126,8 +134,10 @@ public class Settings extends Activity {
 		
 		String[] videoSize = videoFeedSizeSpinner.getSelectedItem().toString().split("x");
 		com.camera.simplemjpeg.MjpegView.setImageSize(Integer.parseInt(videoSize[0]),  Integer.parseInt(videoSize[1]));
-		
+		saveEmotes(editor);
+
 		editor.commit();
+		
 	}
 	
 	
@@ -185,7 +195,88 @@ public class Settings extends Activity {
             break;
         }
     }
+
+    
+
+	public void openEmotePrompt(final View view)
+	{
+		final EditText messageEditText = new EditText(this);
+		String savedMsg = getSavedEmote(view);
+		if (savedMsg == null) { 
+			savedMsg = "Hello!";
+		}
+		System.out.println("message:" +savedMsg);
+		messageEditText.setText(savedMsg);
+		// Build a dialog box to get user input
+		new AlertDialog.Builder(this)
+	    .setTitle("Set emote")
+	    .setMessage("Save an emote hotkey!")
+	    .setView(messageEditText)
+	    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int whichButton) {
+	            String value = messageEditText.getText().toString();
+	            // regex magic to check for ASCII compliance.
+	            if (value.length() < 35)
+	            {
+		            if (!value.matches("\\p{ASCII}+"))
+		            {
+		            	Toast.makeText(getApplicationContext(), "ASCII only please!", Toast.LENGTH_LONG).show();
+		            }
+		            else 
+		            {
+		            	setSavedEmote(view, value);
+		            }
+	            }
+	            else 
+	            {
+	            	Toast.makeText(getApplicationContext(), "Message must be under 35 characters!", Toast.LENGTH_LONG).show();
+	            }
+	            
+	        }
+	    }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+	        public void onClick(DialogInterface dialog, int whichButton) {
+	            // Do nothing.
+	        	return;
+	        }
+	    }).show();
+	}
+ 
+	public String getSavedEmote(View view) {
+    	switch (view.getId()) {
+    	case R.id.emoteBtn1:
+    		return emotes[0];
+    	case R.id.emoteBtn2:
+    		return emotes[1];
+
+    	case R.id.emoteBtn3:
+    		return emotes[2];
+
+    	case R.id.emoteBtn4:
+    		return emotes[3];
+    	}
+		return "N/A";
+	}
 	
+	 
+		public void setSavedEmote(View view, String emote) {
+	    	switch (view.getId()) {
+	    	case R.id.emoteBtn1:
+	    		emotes[0] = emote;
+	    		break;
+	    	case R.id.emoteBtn2:
+	    		emotes[1] = emote;
+	    		break;
+
+	    	case R.id.emoteBtn3:
+	    		emotes[2] = emote;
+	    		break;
+
+	    	case R.id.emoteBtn4:
+	    		emotes[3] = emote;
+	    		break;
+
+	    	}
+		}	
 	public void switchToFeed(View view)
 	{
 		String currentState = btStreamManager.getConnectionState();
@@ -223,10 +314,6 @@ public class Settings extends Activity {
 		super.onDestroy();
 	}	
 	
-	private void connectToDevice(String address)
-	{
-		
-	}
 	
 	private void initiateBluetooth() {
 		try {
@@ -259,5 +346,17 @@ public class Settings extends Activity {
 		
 	}
 	
+	public void loadEmotes (SharedPreferences shared) {
+		emotes = new String[4];
+		for (int i = 0; i < 4; i++){
+			emotes[i] = shared.getString("emotes" + i, "Hello!");
+		}
+	}
+	
+	public void saveEmotes (SharedPreferences.Editor editor) {
+		for (int i = 0; i < emotes.length; i++){
+			editor.putString("emotes"+ i, emotes[i]);
+		}
+	}
 	
 }

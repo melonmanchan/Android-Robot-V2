@@ -434,6 +434,8 @@ public class Feed extends ActionBarActivity {
 	    return super.onKeyDown(keycode, e);
 	}
 	
+	
+	
 	public void openMessagePrompt(View view)
 	{
 		isTransmittingMessage = true;

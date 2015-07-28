@@ -44,6 +44,48 @@
             android:layout_marginTop="72dp"
             android:background="@android:color/darker_gray" />
 
+        <GridLayout
+            android:id="@+id/emotegrid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/emotetext"
+            android:layout_gravity="center"
+            android:layout_marginBottom="50dp"
+            android:layout_marginTop="0dp"
+            android:columnCount="4" >
+
+            <Button
+            android:id="@+id/emoteBtn1"   
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emote 1"
+            android:layout_column="0"
+            android:onClick="openEmotePrompt"/>
+           
+           <Button
+            android:id="@+id/emoteBtn2"      
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emote 2"
+            android:layout_column="1"
+            android:onClick="openEmotePrompt"/>
+           
+            <Button
+            android:id="@+id/emoteBtn3"        
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emote 3"
+            android:layout_column="2"
+            android:onClick="openEmotePrompt"/>
+           
+           <Button
+            android:id="@+id/emoteBtn4"             
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Emote 4"
+            android:layout_column="3"
+            android:onClick="openEmotePrompt"/>
+        </GridLayout>
         <Spinner
             android:id="@+id/feedSizeSpinner"
             android:layout_width="100dp"
@@ -119,7 +161,7 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/textView5"
             android:layout_alignRight="@+id/BTupdateSpeedText"
-            android:layout_marginBottom="25dp"
+            android:layout_marginBottom="0dp"
             android:onClick="checForAvailableBLEDevices"
             android:text="@string/find_new_devices" />
 
@@ -129,7 +171,6 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/feedButton"
             android:layout_alignParentLeft="true"
-            android:layout_margin="10dp"
             android:text="Step 3. Start driving!"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
@@ -139,7 +180,18 @@
             android:layout_height="wrap_content"
             android:layout_above="@+id/findNewDevices"
             android:layout_alignLeft="@+id/textView5"
+            android:layout_marginTop="20dp"
             android:text="Step 2. Connect to robot"
             android:textAppearance="?android:attr/textAppearanceLarge" />
+
+        <TextView
+            android:id="@+id/emotetext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/emotegrid"
+            android:layout_below="@+id/feedSizeSpinner"
+            android:layout_marginTop="37dp"
+            android:text="Set up emotes"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
     
 </RelativeLayout>
