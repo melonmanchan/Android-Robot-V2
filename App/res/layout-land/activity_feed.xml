@@ -15,16 +15,55 @@
         android:layout_width="170dp"
         android:layout_height="170dp"
         android:layout_gravity="right|bottom"
+        android:layout_marginBottom="40dp"
         />
     
     <com.example.robotapp.JoystickView
         android:id="@+id/leftJoystick"
         android:layout_width="170dp"
         android:layout_height="170dp"
-        android:layout_gravity="left|bottom"  
+        android:layout_gravity="left|bottom"
+        android:layout_marginBottom="40dp"
        	 />
 
-    
+        <Button
+        android:id="@+id/emote4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="44dp"
+        android:onClick="useEmote"
+        android:text="Emote 4"
+        android:layout_gravity="right|bottom"
+        android:layout_marginRight="10dp" />
+        
+        <Button
+        android:id="@+id/emote3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="useEmote"
+        android:text="Emote 3"
+        android:layout_gravity="right|bottom"
+        android:layout_marginRight="100dp" />
+                
+        <Button
+        android:id="@+id/emote1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:onClick="useEmote"
+        android:text="Emote 1"
+        android:layout_gravity="left|bottom"
+        android:layout_marginRight="30dp" />
+            
+       <Button
+        android:id="@+id/emote2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="useEmote"
+        android:text="Emote 2"
+        android:layout_gravity="left|bottom"
+        android:layout_marginLeft="100dp" />
+        
     <Button
         android:id="@+id/messageButton"
         android:layout_width="wrap_content"
@@ -33,7 +72,7 @@
         android:onClick="openMessagePrompt"
         android:text="@string/message_btn"
         android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginRight="30dp" />
+        android:layout_marginRight="44dp" />
 
     <TextView
         android:id="@+id/signalText"

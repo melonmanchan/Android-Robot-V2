@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -22,7 +23,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.camera.simplemjpeg.*;
-public class Feed extends ActionBarActivity {
+public class Feed extends Activity {
 
 	
 	private boolean motorStateChanged = false;
@@ -53,8 +54,10 @@ public class Feed extends ActionBarActivity {
 	
 	// Byte array to store all necessary value sin
 	private byte[] motorCommand;
-	
 	private byte[] stopCommand;
+	
+	// Emotes received from Settings activity
+	String[] emotes;
 	
 	// Handlers and runnable responsible for sending data to the Arduino
 	private Handler movementHandler;
@@ -100,6 +103,7 @@ public class Feed extends ActionBarActivity {
 				videoIpAddress = extras.getString("CAMERA_IP_ADDRESS");
 				videoPort = "5000";
 				isCameraEnabled = extras.getBoolean("IS_CAMERA_ENABLED");
+				emotes = extras.getStringArray("EMOTE_ARRAY");
 
 			}
 		}
@@ -283,7 +287,6 @@ public class Feed extends ActionBarActivity {
             	
                 switch (direction) {
                 
-                
                 case JoystickView.FRONT:
                 	                	                	
                 	motorCommand[1] = MOTOR_FORWARD;
@@ -361,7 +364,6 @@ public class Feed extends ActionBarActivity {
                 	motorCommand[3] = MOTOR_RELEASE;
                 	motorCommand[4] = 0;
                 }
-        
 
             }
         }, movementUpdateSpeed / 2 ); 
@@ -478,6 +480,24 @@ public class Feed extends ActionBarActivity {
 		
 	}
  
+	public void useEmote(View view)
+	{
+		switch (view.getId()) {
+    	case R.id.emote1:
+    		sendMessageToRobot(emotes[0]);
+    		break;
+    	case R.id.emote2:
+    		sendMessageToRobot(emotes[1]);
+    		break;
+    	case R.id.emote3:
+    		sendMessageToRobot(emotes[2]);
+    		break;
+    	case R.id.emote4:
+    		sendMessageToRobot(emotes[3]);
+    		break;
+		}
+	}
+	
 	private void sendMessageToRobot(String message)
 	{
 		

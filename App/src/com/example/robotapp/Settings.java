@@ -168,15 +168,7 @@ public class Settings extends Activity {
         	//When the DeviceListActivity return, with the selected device address
             if (resultCode == Activity.RESULT_OK && data != null) {
                 String deviceAddress = data.getStringExtra(BluetoothDevice.EXTRA_DEVICE);
-               // mDevice = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(deviceAddress);
-               btStreamManager.connectToDevice(deviceAddress);
-               
-               
-                //Log.d(TAG, "... onActivityResultdevice.address==" + mDevice + "mserviceValue" + mService);
-                //((TextView) findViewById(R.id.deviceName)).setText(mDevice.getName()+ " - connecting");
-               // mService.connect(deviceAddress);
-                            
-
+               btStreamManager.connectToDevice(deviceAddress);          
             }
             break;
         case REQUEST_ENABLE_BT:
@@ -247,7 +239,6 @@ public class Settings extends Activity {
     		return emotes[0];
     	case R.id.emoteBtn2:
     		return emotes[1];
-
     	case R.id.emoteBtn3:
     		return emotes[2];
 
@@ -266,15 +257,12 @@ public class Settings extends Activity {
 	    	case R.id.emoteBtn2:
 	    		emotes[1] = emote;
 	    		break;
-
 	    	case R.id.emoteBtn3:
 	    		emotes[2] = emote;
 	    		break;
-
 	    	case R.id.emoteBtn4:
 	    		emotes[3] = emote;
 	    		break;
-
 	    	}
 		}	
 	public void switchToFeed(View view)
@@ -286,8 +274,8 @@ public class Settings extends Activity {
 			Intent intent = new Intent(getApplicationContext(), Feed.class);
 			intent.putExtra("BT_UPDATE_SPEED", Integer.parseInt(updateSpeedTextView.getText().toString()));
 			intent.putExtra("CAMERA_IP_ADDRESS", cameraIPAddressTextView.getText().toString());
-			//intent.putExtra("CAMERA_PORT", cameraPortTextView.getText().toString());
 			intent.putExtra("IS_CAMERA_ENABLED", isCameraEnabledCheckBox.isChecked());
+			intent.putExtra("EMOTE_ARRAY", emotes);
 			
 			startActivity(intent);
 		}
