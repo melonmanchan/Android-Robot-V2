@@ -281,9 +281,7 @@ void setup() {
 void loop() {
 
   BTLEserial.pollACI();
-  //BTLEserial.pollACI();
   handleSerialInput();
-  //BTLEserial.pollACI();
 
   currentCmdTime = mouthTimer = eyeTimer = messageCurrentTime = millis();
 
