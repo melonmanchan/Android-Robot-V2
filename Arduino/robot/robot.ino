@@ -21,8 +21,11 @@ Adafruit_DCMotor *rightMotor = motorShield.getMotor(2);
 
 Adafruit_BLE_UART BTLEserial = Adafruit_BLE_UART(ADAFRUITBLE_REQ, ADAFRUITBLE_RDY, ADAFRUITBLE_RST);
 
-int eye_pupil_color = 12314;
-int eye_ball_color = 0xFFFF;
+//int eye_pupil_color = 12314;
+//int eye_ball_color = 0xFFFF;
+
+uint32_t eye_pupil_color;
+uint32_t eye_ball_color;
 
 Adafruit_NeoMatrix eyematrix = Adafruit_NeoMatrix(8, 8, EYE_PIN,
                                NEO_MATRIX_TOP     + NEO_MATRIX_RIGHT +
@@ -45,7 +48,6 @@ Adafruit_TiCoServo topServo;
 // Starting positions for servos.
 byte bottomPos = 90;
 byte topPos = 25;
-
 
 byte bottomPosMax = 175;
 byte bottomPosMin = 15;
@@ -138,41 +140,6 @@ int8_t dY   = 0;   // Distance from prior to new position
 
 byte mouthIndex = 0;
 boolean isMouthAnimationPlayingBackwards = false;
-// different mouth positions
-/*
-static const uint8_t mouthPos[][5] PROGMEM =
-{
-  {
-    0xff,
-    0xff,
-    0xff,
-    0xff,
-    0xff
-  },
-  {
-    0xff,
-    0xff,
-    0xaa,
-    0x55,
-    0xff
-  },
-  {
-    // open maw for mouth pos 1
-    0xff,
-    0xaa,
-    0x0,
-    0x55,
-    0xff
-  },
-  {
-    0xaa,
-    0x0,
-    0x0,
-    0x0,
-    0x55
-  }
-};
-*/
 
 // Testing other mouth without zig-zag position
 static const uint8_t mouthPos[][5] PROGMEM =
@@ -244,17 +211,17 @@ byte motorCommand[5];
 byte motorCmdIndex = 0;
 long previousMillis = 0;
 
-typedef enum {NOTHING, MOTOR, MESSAGE, TOGGLE, PINPWM} state;
+typedef enum {NOTHING, MOTOR, MESSAGE} state;
 state currentState;
 
 void setup() {
   motorShield.begin();
   Serial.begin(9600);
   eyematrix.begin();
-  eyematrix.setBrightness(20);
+  eyematrix.setBrightness(30);
 
   mouthmatrix.begin();
-  mouthmatrix.setBrightness(20);
+  mouthmatrix.setBrightness(30);
   resetRobotMouth();
   BTLEserial.setDeviceName("ROBOT"); /* 7 characters max! */
 
@@ -262,16 +229,15 @@ void setup() {
   Serial.begin(9600);
   currentState = NOTHING;
   // Seed random number generator from an unused analog input:
-  randomSeed(analogRead(A0));
-  // Initialize each matrix object:
+  randomSeed(analogRead(A15));
+  
+  eye_pupil_color = mouthmatrix.Color(random(0, 255), random(0, 255), random(0, 255) );
+  eye_ball_color = 0xFFFFFF - eye_pupil_color;
 
   bottomServo.attach(12, 500, 2200);
   topServo.attach(13, 500, 2200);  // attaches the servo on pin 9 to the servo object
   bottomServo.write(bottomPos);
   topServo.write(topPos);
-
-  while (Serial.read() != ':');   // When the Emic 2 has initialized and is ready, it will send a single ':' character, so wait here until we receive it
-  delay(10);                          // Short delay
 
   Serial.flush();                 // Flush the receive buffer
   Serial.println("V18");
